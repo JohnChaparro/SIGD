@@ -1,0 +1,166 @@
+CREATE DATABASE IF NOT EXISTS `SIGD` DEFAULT CHARACTER SET utf8 ;
+
+USE `SIGD` ;
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`Empleados` (
+`CodEmpleado` INT(15) NOT NULL COMMENT 'Numero de indentificación del empleado.',
+`AreaTrabajo` VARCHAR(45) NOT NULL COMMENT 'Area a la que pertenece el empleado.',
+`CargoEmpleado` VARCHAR(45) NOT NULL COMMENT 'Cargo que tiene el empleado.',
+PRIMARY KEY (`CodEmpleado`),
+UNIQUE INDEX `idEmpleados_UNIQUE` (`CodEmpleado` ASC))
+ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`DescripRegistro` (
+`CodDescripRegistro` INT(15) NOT NULL COMMENT 'Codigo de la descripcion del regoistro de usuarios.',
+`TelefUsuario` INT(15) NOT NULL COMMENT 'Telefono de contacto de la persona que se va a registrar.',
+`DirecciUsuario` VARCHAR(40) NOT NULL COMMENT 'Direccion de la residencia de la persona que se va a registrar.',
+`FechaNacimiento` DATE NOT NULL COMMENT 'Fecha de nacimiento de la persona que se va a a registrar.',
+PRIMARY KEY (`CodDescripRegistro`))
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`RegistroUsuario` (
+`IDUsuario` INT(10) NOT NULL,
+`NomUsuario` VARCHAR(45) NOT NULL COMMENT 'Nombre de la persona que se va a registrar.',
+`ApelliUsuario` VARCHAR(45) NOT NULL COMMENT 'Apellido de la persona que se va a registrar.',
+`CorreoUsuario` VARCHAR(45) NOT NULL COMMENT 'Correo electronico de la persona que se va a registrar.',
+`DescripRegistro_CodDescripRegistro` INT(15) NOT NULL,
+PRIMARY KEY (`IDUsuario`, `DescripRegistro_CodDescripRegistro`),
+INDEX `fk_RegistroUsuario_DescripRegistro1_idx` (`DescripRegistro_CodDescripRegistro` ASC),
+CONSTRAINT `fk_RegistroUsuario_DescripRegistro1`
+FOREIGN KEY (`DescripRegistro_CodDescripRegistro`)
+REFERENCES `SIGD`.`DescripRegistro` (`CodDescripRegistro`)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`Roles` (
+`CodRol` INT(15) NOT NULL COMMENT 'Codigo unico de identificación del rol',
+`NomRol` VARCHAR(45) NOT NULL COMMENT 'Nombre del rol.',
+`DescripRol` VARCHAR(90) NOT NULL COMMENT 'Breve descripcion de las funciones del rol.',
+PRIMARY KEY (`CodRol`))
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`Usuarios` (
+`NickNameUsuario` VARCHAR(45) NOT NULL COMMENT 'Nombre de usuario generado para el acceso a la plataforma.',
+`PasswordUsuario` VARCHAR(45) NOT NULL COMMENT 'Contraseña de acceso a la plataforma.',
+`RegistroUsuario_IDUsuario` INT(10) NOT NULL,
+`Roles_CodRol` INT(15) NOT NULL,
+PRIMARY KEY (`NickNameUsuario`, `RegistroUsuario_IDUsuario`, `Roles_CodRol`),
+UNIQUE INDEX `ID_Usuarios_UNIQUE` (`NickNameUsuario` ASC),
+INDEX `fk_Usuarios_RegistroUsuario_idx` (`RegistroUsuario_IDUsuario` ASC),
+INDEX `fk_Usuarios_Roles1_idx` (`Roles_CodRol` ASC),
+CONSTRAINT `fk_Usuarios_RegistroUsuario`
+FOREIGN KEY (`RegistroUsuario_IDUsuario`)
+REFERENCES `SIGD`.`RegistroUsuario` (`IDUsuario`)
+ON DELETE NO ACTION
+    
+ON UPDATE NO ACTION,
+CONSTRAINT `fk_Usuarios_Roles1`
+FOREIGN KEY (`Roles_CodRol`)
+REFERENCES `SIGD`.`Roles` (`CodRol`)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`DetalleDocumento` (
+`CodDetalleDocumento` INT(15) NOT NULL COMMENT 'Codigo de identificacion de el detalle del documento.',
+`TipoDocumento` VARCHAR(45) NOT NULL COMMENT 'Tipo de documento',
+`DescripDocumento` VARCHAR(90) NOT NULL COMMENT 'Breve descripción del documento.',
+PRIMARY KEY (`CodDetalleDocumento`))
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`Documentos` (
+`CodDocumento` INT(15) NOT NULL COMMENT 'Codigo de identificacion del documento.',
+`NomDocumento` VARCHAR(45) NOT NULL COMMENT 'Nombre del documento.',
+`DetalleDocumento_CodDetalleDocumento` INT(15) NOT NULL,
+PRIMARY KEY (`CodDocumento`, `DetalleDocumento_CodDetalleDocumento`),
+INDEX `fk_Documentos_DetalleDocumento1_idx` (`DetalleDocumento_CodDetalleDocumento` ASC),
+CONSTRAINT `fk_Documentos_DetalleDocumento1`
+FOREIGN KEY (`DetalleDocumento_CodDetalleDocumento`)
+REFERENCES `SIGD`.`DetalleDocumento` (`CodDetalleDocumento`)
+ON DELETE NO ACTION
+    
+ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`Descargas` (
+`ID_Descargas` INT NOT NULL COMMENT 'Codigo que genera el sistema a cada descarga.',
+`Forma_descarga` VARCHAR(45) NOT NULL COMMENT 'Formato en el que se descargara el documento.',
+`Fecha_descarga` DATE NOT NULL COMMENT 'Fecha en la que se descarga el documento.',
+`Documentos_CodDocumento` INT(15) NOT NULL,
+PRIMARY KEY (`ID_Descargas`, `Documentos_CodDocumento`),
+UNIQUE INDEX `ID_Descargas_UNIQUE` (`ID_Descargas` ASC),
+INDEX `fk_Descargas_Documentos1_idx` (`Documentos_CodDocumento` ASC),
+CONSTRAINT `fk_Descargas_Documentos1`
+FOREIGN KEY (`Documentos_CodDocumento`)
+REFERENCES `SIGD`.`Documentos` (`CodDocumento`)
+ON DELETE NO ACTION
+    
+ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`DetalleModificacion` (
+`CodDetalleModificacion` INT(15) NOT NULL COMMENT 'Codigo que identifica el detalle de la modificación.',
+`TipoModificacion` VARCHAR(45) NOT NULL COMMENT 'Descripcion de el tipo de modificacion que se le realizara al documento',
+`FechaIniciModificacion` DATE NOT NULL COMMENT 'Fecha y hora en la que se comienza la modificación del documento',
+`FechaFinModificacion` DATE NOT NULL COMMENT 'Fecha y hora en la que se finaliza la modificación del documento.',
+PRIMARY KEY (`CodDetalleModificacion`))
+ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`Modificacion` (
+
+
+
+`CodModificacion` INT(15) NOT NULL COMMENT 'Codigo que se asignara a cada modificación realizada.',
+
+`Roles_CodRol` INT(15) NOT NULL,
+`Documentos_CodDocumento` INT(15) NOT NULL,
+`DetalleModificacion_CodDetalleModificacion` INT(15) NOT NULL,
+PRIMARY KEY (`CodModificacion`, `Roles_CodRol`, `Documentos_CodDocumento`, `DetalleModificacion_CodDetalleModificacion`),
+INDEX `fk_Modificacion_Roles1_idx` (`Roles_CodRol` ASC),
+INDEX `fk_Modificacion_Documentos1_idx` (`Documentos_CodDocumento` ASC),
+INDEX `fk_Modificacion_DetalleModificacion1_idx` (`DetalleModificacion_CodDetalleModificacion` ASC),
+CONSTRAINT `fk_Modificacion_Roles1`
+FOREIGN KEY (`Roles_CodRol`)
+REFERENCES `SIGD`.`Roles` (`CodRol`)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION,
+CONSTRAINT `fk_Modificacion_Documentos1`
+FOREIGN KEY (`Documentos_CodDocumento`)
+REFERENCES `SIGD`.`Documentos` (`CodDocumento`)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION,
+CONSTRAINT `fk_Modificacion_DetalleModificacion1`
+FOREIGN KEY (`DetalleModificacion_CodDetalleModificacion`)
+REFERENCES `SIGD`.`DetalleModificacion` (`CodDetalleModificacion`)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS `SIGD`.`DescripcionEmpleados` (
+`CodDescripEmpleados` INT(15) NOT NULL COMMENT 'Codigo de la descripcion del empleado',
+`Empleados_CodEmpleado` INT(15) NOT NULL,
+`RegistroUsuario_IDUsuario` INT(10) NOT NULL,
+PRIMARY KEY (`CodDescripEmpleados`, `Empleados_CodEmpleado`, `RegistroUsuario_IDUsuario`),
+INDEX `fk_Empleados_has_RegistroUsuario_RegistroUsuario1_idx` (`RegistroUsuario_IDUsuario` ASC),
+INDEX `fk_Empleados_has_RegistroUsuario_Empleados1_idx` (`Empleados_CodEmpleado` ASC),
+CONSTRAINT `fk_Empleados_has_RegistroUsuario_Empleados1`
+FOREIGN KEY (`Empleados_CodEmpleado`)
+REFERENCES `SIGD`.`Empleados` (`CodEmpleado`)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION,
+CONSTRAINT `fk_Empleados_has_RegistroUsuario_RegistroUsuario1`
+FOREIGN KEY (`RegistroUsuario_IDUsuario`)
+REFERENCES `SIGD`.`RegistroUsuario` (`IDUsuario`)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+      
+
+
